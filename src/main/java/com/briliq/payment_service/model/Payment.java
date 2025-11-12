@@ -3,43 +3,24 @@ package com.briliq.payment_service.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "payments")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Payment {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    private String userId;
-    private String subscriptionId;
-
-    @Column(nullable = false)
-    private BigDecimal amount;
-
-    private String method;
-
-    @Column(nullable = false)
+    private Double amount;
+    private String currency;
     private String status;
-
-    private Instant createdAt;
-    private Instant updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = Instant.now();
-        updatedAt = Instant.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = Instant.now();
-    }
+    private String description;
+    private String method;
+    private LocalDateTime createdAt = LocalDateTime.now();
 }

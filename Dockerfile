@@ -1,14 +1,14 @@
-# Use a stable, lightweight Java 17 runtime
-FROM eclipse-temurin:17-jdk
+# Use a lightweight JDK image
+FROM eclipse-temurin:17-jdk-jammy
 
 # Set working directory
 WORKDIR /app
 
-# Copy the JAR
+# Copy the JAR built by Maven
 COPY target/payment-service-1.0.0.jar app.jar
 
-# Expose port
+# Expose Spring Boot port
 EXPOSE 8081
 
-# Run the Spring Boot app
+# Run the JAR
 ENTRYPOINT ["java", "-jar", "app.jar"]
