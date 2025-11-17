@@ -1,0 +1,31 @@
+{
+  "name": "briliq-payment-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dandiagusm/briliq-payment-service.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/dandiagusm/briliq-payment-service/issues"
+  },
+  "homepage": "https://github.com/dandiagusm/briliq-payment-service#readme",
+  "dependencies": {
+    "axios": "^1.13.2",
+    "dotenv": "^17.2.3",
+    "fastify": "^5.6.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
