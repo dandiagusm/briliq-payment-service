@@ -54,12 +54,14 @@ export const reconcile = async (req, reply) => {
   reply.send(await paymentService.reconcile(req.params.id));
 };
 
+
 export const callbackHandler = async (req, reply) => {
   try {
-    const token = req.headers["x-callback-token"];
-    await paymentService.handleCallback(req.body, token);
+    await paymentService.handleCallback(req.body, req.headers);
     reply.send("OK");
   } catch (err) {
     reply.code(403).send({ message: err.message });
   }
 };
+
+

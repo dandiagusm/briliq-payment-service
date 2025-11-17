@@ -2,6 +2,20 @@ import XenditService from "./xenditService.js";
 import paymentModel from "../models/paymentModel.js";
 import QRCode from "qrcode";
 
+import crypto from "crypto";
+import paymentModel from "../models/paymentModel.js";
+
+function verifySignature(rawBody, signature) {
+  const secret = process.env.XENDIT_WEBHOOK_SECRET;
+
+  const hmac = crypto.createHmac("sha256", secret);
+  hmac.update(rawBody);
+
+  const digest = hmac.digest("hex");
+
+  return digest === signature;
+}
+
 let xendit = null;
 function getXendit() {
   if (!xendit) xendit = new XenditService();
@@ -83,6 +97,23 @@ export default {
     }
 
     const { external_id, status } = body;
+    await paymentModel.updateStatus(external_id, status);
+
+    return { success: true };
+  },
+
+  async handleCallback(body, headers) {
+    const token = headers["x-callback-token"];
+
+    if (!token) {
+      throw new Error("Missing callback token");
+    }
+    if (token !== process.env.X_CALLBACK_TOKEN) {
+      throw new Error("Invalid callback token");
+    }
+
+    const { external_id, status } = body;
+
     await paymentModel.updateStatus(external_id, status);
 
     return { success: true };
