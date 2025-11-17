@@ -13,6 +13,10 @@ class PaymentModel {
     p.status = status;
     this.db.set(orderId, p);
   }
+
+  async find(orderId) {
+    return this.db.get(orderId);
+  }
 }
 
 export default new PaymentModel();

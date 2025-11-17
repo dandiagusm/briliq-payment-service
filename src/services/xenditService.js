@@ -14,16 +14,20 @@ class XenditService {
   }
 
   async createInvoice(orderId, amount) {
-   const payload = {
-    external_id: orderId,
-    amount,
-    payment_methods: ["QRIS"]  // hanya QRIS
-  };
+    const payload = {
+      external_id: orderId,
+      amount,
+      payment_methods: ["QRIS"] // QRIS only
+    };
 
-   const { data } = await this.client.post("/v2/invoices", payload);
-   return data;
- }
+    const { data } = await this.client.post("/v2/invoices", payload);
+    return data;
+  }
 
+  async getInvoice(invoiceId) {
+    const { data } = await this.client.get(`/v2/invoices/${invoiceId}`);
+    return data;
+  }
 }
 
 export default XenditService;
