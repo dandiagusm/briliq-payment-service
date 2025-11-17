@@ -34,8 +34,12 @@ export const searchInvoices = async (req, reply) => {
 };
 
 export const getQRImage = async (req, reply) => {
-  const img = await paymentService.generateQRImage(req.params.id);
-  reply.send({ qr_base64: img });
+  try {
+    const img = await paymentService.generateQRImage(req.params.id);
+    reply.send({ qr_base64: img });
+  } catch (err) {
+    reply.code(500).send({ message: err.message });
+  }
 };
 
 export const cancelInvoice = async (req, reply) => {
@@ -54,7 +58,6 @@ export const reconcile = async (req, reply) => {
   reply.send(await paymentService.reconcile(req.params.id));
 };
 
-
 export const callbackHandler = async (req, reply) => {
   try {
     await paymentService.handleCallback(req.body, req.headers);
@@ -63,5 +66,3 @@ export const callbackHandler = async (req, reply) => {
     reply.code(403).send({ message: err.message });
   }
 };
-
-

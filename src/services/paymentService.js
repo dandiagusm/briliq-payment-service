@@ -2,47 +2,40 @@ import XenditService from "./xenditService.js";
 import paymentModel from "../models/paymentModel.js";
 import QRCode from "qrcode";
 
-import crypto from "crypto";
-import paymentModel from "../models/paymentModel.js";
-
-function verifySignature(rawBody, signature) {
-  const secret = process.env.XENDIT_WEBHOOK_SECRET;
-
-  const hmac = crypto.createHmac("sha256", secret);
-  hmac.update(rawBody);
-
-  const digest = hmac.digest("hex");
-
-  return digest === signature;
-}
-
 let xendit = null;
+
 function getXendit() {
   if (!xendit) xendit = new XenditService();
   return xendit;
 }
 
 export default {
-  async createPayment({ orderId, amount, userId }) {
-    const x = getXendit();
-    const invoice = await x.createInvoice(orderId, amount, userId);
+	async createPayment({ orderId, amount, userId }) {
+	  const x = getXendit();
 
-    await paymentModel.save({
-      orderId,
-      userId,
-      amount,
-      status: "PENDING",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      metadata: invoice
-    });
+	  // CREATE
+	  const invoice = await x.createInvoice(orderId, amount, userId);
+	
+	  // GET FULL INVOICE DETAIL
+	  const detail = await x.getInvoice(invoice.id);
 
-    return invoice;
-  },
+	  await paymentModel.save({
+	    orderId,
+	    amount,
+	    userId,
+	    invoiceId: detail.id,    // ✔ ID YANG BENAR
+	    status: detail.status,
+	    metadata: detail,
+	    createdAt: new Date(),
+	    updatedAt: new Date()
+	  });
+
+	  return detail;
+	},
 
   async getInvoice(id) {
-    const x = getXendit();
-    return await x.getInvoice(id);
+  	const x = getXendit();
+  	return await x.getInvoice(id);
   },
 
   async getAllInvoices() {
@@ -61,29 +54,39 @@ export default {
     return await paymentModel.search(filters);
   },
 
-  async generateQRImage(id) {
-    const invoice = await this.getInvoice(id);
-    const qrString = invoice.qr_string;
-    return await QRCode.toDataURL(qrString);
-  },
+async generateQRImage(invoiceId) {
+  const x = getXendit();
+
+  // SELALU ambil fresh detail
+  const invoice = await x.getInvoice(invoiceId);
+
+  const qrString = invoice.qr_string;
+
+  if (!qrString) {
+    throw new Error("QR not ready, try again in 1–2 seconds");
+  }
+
+  return await QRCode.toDataURL(qrString);
+},
+
 
   async cancel(id) {
     const x = getXendit();
-    const data = await x.cancelInvoice(id);
+    const result = await x.cancelInvoice(id);
     await paymentModel.updateByInvoiceId(id, { status: "CANCELLED" });
-    return data;
+		return result;
   },
 
   async expire(id) {
     const x = getXendit();
-    const data = await x.expireInvoice(id);
+    const result = await x.expireInvoice(id);
     await paymentModel.updateByInvoiceId(id, { status: "EXPIRED" });
-    return data;
+    return result;
   },
 
   async refund({ invoiceId, amount }) {
     const x = getXendit();
-    return await x.refund({ paymentId: invoiceId, amount });
+    return await x.refund({ payment_id: invoiceId, amount });
   },
 
   async reconcile(id) {
@@ -91,17 +94,7 @@ export default {
     return await x.reconcile(id);
   },
 
-  async handleCallback(body, token) {
-    if (token !== process.env.X_CALLBACK_TOKEN) {
-      throw new Error("Invalid callback token");
-    }
-
-    const { external_id, status } = body;
-    await paymentModel.updateStatus(external_id, status);
-
-    return { success: true };
-  },
-
+  // CALLBACK TOKEN ONLY
   async handleCallback(body, headers) {
     const token = headers["x-callback-token"];
 

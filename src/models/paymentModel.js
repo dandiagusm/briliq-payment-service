@@ -15,9 +15,9 @@ class PaymentModel {
     this.db.set(orderId, p);
   }
 
-  async updateByInvoiceId(id, payload) {
+  async updateByInvoiceId(invoiceId, payload) {
     for (const [key, value] of this.db) {
-      if (value.metadata.id === id) {
+      if (value.invoiceId === invoiceId) {
         const updated = { ...value, ...payload, updatedAt: new Date() };
         this.db.set(key, updated);
       }
@@ -28,29 +28,22 @@ class PaymentModel {
     return this.db.get(orderId);
   }
 
-  async findByInvoiceId(id) {
-    for (const value of this.db.values()) {
-      if (value.metadata.id === id) return value;
-    }
-    return null;
+  async findByUser(userId) {
+    return Array.from(this.db.values()).filter(p => p.userId === userId);
   }
 
   async findAll() {
     return Array.from(this.db.values());
   }
 
-  async findByUser(userId) {
-    return Array.from(this.db.values()).filter(p => p.userId === userId);
-  }
-
-  async search({ status, from, to, limit = 20, offset = 0 }) {
+  async search(filters) {
     let data = Array.from(this.db.values());
 
-    if (status) data = data.filter(p => p.status === status);
-    if (from) data = data.filter(p => new Date(p.createdAt) >= new Date(from));
-    if (to) data = data.filter(p => new Date(p.createdAt) <= new Date(to));
+    if (filters.status) {
+      data = data.filter(p => p.status === filters.status);
+    }
 
-    return data.slice(offset, offset + limit);
+    return data;
   }
 }
 

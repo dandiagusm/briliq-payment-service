@@ -23,6 +23,7 @@ async function routes(fastify) {
   fastify.get("/search", searchInvoices);
 
   fastify.get("/:id/qris-image", getQRImage);
+
   fastify.post("/cancel/:id", cancelInvoice);
   fastify.post("/expire/:id", expireInvoice);
 

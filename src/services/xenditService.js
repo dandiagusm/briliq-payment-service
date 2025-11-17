@@ -3,13 +3,10 @@ import axios from "axios";
 class XenditService {
   constructor() {
     const key = process.env.XENDIT_SECRET;
-    if (!key) {
-      console.error("❌ Missing XENDIT_SECRET in environment.");
-    }
 
     this.client = axios.create({
       baseURL: "https://api.xendit.co",
-      auth: { username: key ?? "", password: "" }
+      auth: { username: key, password: "" }
     });
   }
 
@@ -17,8 +14,8 @@ class XenditService {
     const payload = {
       external_id: orderId,
       amount,
-      payment_methods: ["QRIS"],
-      customer_id: userId
+      customer_id: userId,
+      payment_methods: ["QRIS"]
     };
 
     const { data } = await this.client.post("/v2/invoices", payload);
@@ -40,11 +37,8 @@ class XenditService {
     return data;
   }
 
-  async refund({ paymentId, amount }) {
-    const { data } = await this.client.post(`/v2/refunds`, {
-      payment_id: paymentId,
-      amount
-    });
+  async refund(payload) {
+    const { data } = await this.client.post(`/v2/refunds`, payload);
     return data;
   }
 
