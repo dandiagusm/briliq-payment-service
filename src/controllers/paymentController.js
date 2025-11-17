@@ -5,39 +5,61 @@ export const createPayment = async (req, reply) => {
     const result = await paymentService.createPayment(req.body);
     reply.send(result);
   } catch (err) {
-    console.error("🔥 Create Payment Error:", err.response?.data || err.message);
-    reply.code(500).send({ message: err.message });
-  }
-};
-
-export const paymentCallback = async (req, reply) => {
-  try {
-    console.log("🔥 CALLBACK RECEIVED:", req.body);
-    await paymentService.handleCallback(req.body);
-    reply.status(200).send("OK");
-  } catch (err) {
-    console.error("🔥 Callback Error:", err);
     reply.code(500).send({ message: err.message });
   }
 };
 
 export const getInvoice = async (req, reply) => {
   try {
-    const invoiceId = req.params.id;
-    const data = await paymentService.getInvoice(invoiceId);
-    reply.send(data);
+    reply.send(await paymentService.getInvoice(req.params.id));
   } catch (err) {
-    console.error("🔥 Get Invoice Error:", err.message);
     reply.code(500).send({ message: err.message });
   }
 };
 
 export const getAllInvoices = async (req, reply) => {
+  reply.send(await paymentService.getAllInvoices());
+};
+
+export const getStatus = async (req, reply) => {
+  reply.send(await paymentService.getStatus(req.params.orderId));
+};
+
+export const getUserInvoices = async (req, reply) => {
+  reply.send(await paymentService.getUserInvoices(req.params.userId));
+};
+
+export const searchInvoices = async (req, reply) => {
+  reply.send(await paymentService.search(req.query));
+};
+
+export const getQRImage = async (req, reply) => {
+  const img = await paymentService.generateQRImage(req.params.id);
+  reply.send({ qr_base64: img });
+};
+
+export const cancelInvoice = async (req, reply) => {
+  reply.send(await paymentService.cancel(req.params.id));
+};
+
+export const expireInvoice = async (req, reply) => {
+  reply.send(await paymentService.expire(req.params.id));
+};
+
+export const refundPayment = async (req, reply) => {
+  reply.send(await paymentService.refund(req.body));
+};
+
+export const reconcile = async (req, reply) => {
+  reply.send(await paymentService.reconcile(req.params.id));
+};
+
+export const callbackHandler = async (req, reply) => {
   try {
-    const invoices = await paymentService.getAllInvoices();
-    reply.send(invoices);
+    const token = req.headers["x-callback-token"];
+    await paymentService.handleCallback(req.body, token);
+    reply.send("OK");
   } catch (err) {
-    console.error("🔥 Get All Invoices Error:", err.message);
-    reply.code(500).send({ message: err.message });
+    reply.code(403).send({ message: err.message });
   }
 };
