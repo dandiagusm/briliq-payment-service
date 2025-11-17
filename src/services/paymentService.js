@@ -4,7 +4,9 @@ import paymentModel from "../models/paymentModel.js";
 let xendit = null;
 
 function getXendit() {
-  if (!xendit) xendit = new XenditService();
+  if (!xendit) {
+    xendit = new XenditService();
+  }
   return xendit;
 }
 
@@ -30,5 +32,9 @@ export default {
   async getInvoice(id) {
     const x = getXendit();
     return await x.getInvoice(id);
+  },
+
+  async getAllInvoices() {
+    return await paymentModel.findAll();
   }
 };

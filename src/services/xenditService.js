@@ -17,7 +17,7 @@ class XenditService {
     const payload = {
       external_id: orderId,
       amount,
-      payment_methods: ["QRIS"] // QRIS only
+      payment_methods: ["QRIS"]
     };
 
     const { data } = await this.client.post("/v2/invoices", payload);

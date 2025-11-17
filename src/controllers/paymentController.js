@@ -24,10 +24,20 @@ export const paymentCallback = async (req, reply) => {
 export const getInvoice = async (req, reply) => {
   try {
     const invoiceId = req.params.id;
-    const result = await paymentService.getInvoice(invoiceId);
-    reply.send(result);
+    const data = await paymentService.getInvoice(invoiceId);
+    reply.send(data);
   } catch (err) {
     console.error("🔥 Get Invoice Error:", err.message);
+    reply.code(500).send({ message: err.message });
+  }
+};
+
+export const getAllInvoices = async (req, reply) => {
+  try {
+    const invoices = await paymentService.getAllInvoices();
+    reply.send(invoices);
+  } catch (err) {
+    console.error("🔥 Get All Invoices Error:", err.message);
     reply.code(500).send({ message: err.message });
   }
 };

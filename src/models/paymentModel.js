@@ -17,6 +17,10 @@ class PaymentModel {
   async find(orderId) {
     return this.db.get(orderId);
   }
+
+  async findAll() {
+    return Array.from(this.db.values());
+  }
 }
 
 export default new PaymentModel();
